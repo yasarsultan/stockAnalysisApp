@@ -1,25 +1,109 @@
 import streamlit as st
 import yfinance as yf
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
+# from predict import pred
 
-st.title('Stock Price Analysis Dashboard')
+def ratio_metrics(tickerData):
+    info = tickerData.info
+    pe_ratio = info['trailingPE']
+    return pe_ratio
 
-# Create a sidebar with options
+
 with st.sidebar:
     selected = option_menu(
-        menu_title="Main Menu",  # required
-        options=["Home", "Page 1", "Page 2", "Page 3"],  # required
-        icons=["house", "file-earmark-text", "file-earmark-text", "file-earmark-text"],  # optional
-        menu_icon="cast",  # optional
-        default_index=0,  # optional
+        menu_title="Main Menu",
+        options=["Home", "Compare", "Predict"],
+        icons=["house", "bar-chart-steps", "graph-up-arrow"],
+        default_index=0,
     )
 
-# Create pages based on the selected option
 if selected == "Home":
-    st.write("# Welcome to the Home Page")
-    st.write("This is the home page of the app.")
+    st.title('Stock Price Analysis Dashboard')
+    st.write("")
+    tickerSymbol = st.text_input('Ticker Symbol', 'AAPL')
+    tickerData = yf.Ticker(tickerSymbol)
+    startdate = st.date_input('Start Date')
+    enddate = st.date_input('End Date')
+
+    tickerDf = tickerData.history(period='1d', start=startdate, end=enddate)
+
+    st.write("")
+    st.write("")
+    st.line_chart(tickerDf.Close)
+    st.bar_chart(tickerDf.Volume)
+    st.write("")
+    st.write("")
+
+    pe = ratio_metrics(tickerData)
+    st.write("Income statement")
+    st.write(tickerData.incomestmt)
+    st.write("")
+    st.write("Balance Sheet")
+    st.write(tickerData.balance_sheet)
+    st.write("")
+    st.write("Cash Flow")
+    st.write(tickerData.cashflow)
+    st.write("")    
+    st.write("Stock Info")
+    st.write(tickerData.info)
+    st.write("")
+    st.write("Financials")
+    st.write(tickerData.financials)
+    st.write("")
+    st.write("Dataframe")
+    st.write(tickerDf.describe())
+
+
+    st.title("Ratio Metrics")
+    # Create the gauge figure
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=pe,
+        gauge={'axis': {'range': [0, 40]},
+            'bar': {'color': "black"},
+            'steps': [{'range': [0, 15], 'color': "green"},
+                        {'range': [16, 25], 'color': "gold"},
+                        {'range': [26, 40], 'color': "red"}]},
+        title={'text': "Price-to-Earning Ratio"}
+    ))
+    fig.update_layout(width=500, height=400, margin=dict(l=20, r=20, t=50, b=50))
+    st.plotly_chart(fig)
+
+elif selected == "Compare":
+    st.title("Comparision")
+    startdate = st.date_input('Start Date')
+    enddate = st.date_input('End Date')
+    st.write("")
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Enter 1st stock")
+        tickerSymbol1 = st.text_input('Ticker Symbol', 'AAPL')
+        tickerData1 = yf.Ticker(tickerSymbol1)
+        tickerDf1 = tickerData1.history(period='1d', start=startdate, end=enddate)
+        fig1 = go.Figure()
+        fig1.add_trace(go.Scatter(x=tickerDf1.index, y=tickerDf1['Close'], mode='lines', name='Stock 1'))
+        fig1.update_layout(title='Stock 1 Close Price', xaxis_title='Date', yaxis_title='Price')
+        st.plotly_chart(fig1)
+
+    with col2:
+        st.write("Enter 2nd stock")
+        tickerSymbol2 = st.text_input('Ticker Symbol', 'GOOG')
+        tickerData2 = yf.Ticker(tickerSymbol2)
+        tickerDf2 = tickerData2.history(period='1d', start=startdate, end=enddate)
+        fig2 = go.Figure()
+        fig2.add_trace(go.Scatter(x=tickerDf2.index, y=tickerDf2['Close'], mode='lines', name='Stock 2'))
+        fig2.update_layout(title='Stock 2 Close Price', xaxis_title='Date', yaxis_title='Price')
+        st.plotly_chart(fig2)
+    
+
+elif selected == "Predict":
+    st.write("Predicting Stock Prices")
+    st.write("")
 
     tickerSymbol = st.text_input('Ticker Symbol', 'AAPL')
     tickerData = yf.Ticker(tickerSymbol)
@@ -28,43 +112,13 @@ if selected == "Home":
 
     tickerDf = tickerData.history(period='1d', start=startdate, end=enddate)
 
-    st.line_chart(tickerDf.Close)
-    st.line_chart(tickerDf.Volume)
+    fig, ax = plt.subplots(figsize=(16, 6))
+    ax.set_title('Close Price History')
+    ax.plot(tickerDf['Close'])
+    ax.set_xlabel('Date', fontsize=18)
+    ax.set_ylabel('Price', fontsize=18)
+    st.pyplot(fig)
 
-    price_stats = tickerDf.describe()
-    st.write(price_stats)
-
-
-    # Set the title of the app
-    st.title("Analog Gauge Meter")
-
-    # Create a slider to simulate meter value
-    meter_value = st.slider("Set Meter Value", 0, 100, 50)
-
-    # Create the gauge figure
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=meter_value,
-        gauge={'axis': {'range': [0, 100]},
-            'bar': {'color': "black"},
-            'steps': [{'range': [0, 25], 'color': "lightgreen"},
-                        {'range': [25, 75], 'color': "gold"},
-                        #  {'range': [50, 75], 'color': "pink"},
-                        {'range': [75, 100], 'color': "pink"}]},
-        title={'text': "Meter Value"}
-    ))
-
-    fig.update_layout(width=500, height=400, margin=dict(l=50, r=20, t=50, b=50))
-
-    # Display the radial gauge in the Streamlit app
-    st.plotly_chart(fig)
-
-elif selected == "Page 1":
-    st.write("# Welcome to Page 1")
-    st.write("This is Page 1 of the app.")
-elif selected == "Page 2":
-    st.write("# Welcome to Page 2")
-    st.write("This is Page 2 of the app.")
-elif selected == "Page 3":
-    st.write("# Welcome to Page 3")
-    st.write("This is Page 3 of the app.")
+    st.write("")
+    st.subheader("Stock price prediction is only available on local machine...")
+    # pred(tickerDf)
