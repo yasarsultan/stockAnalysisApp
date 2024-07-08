@@ -1,5 +1,5 @@
 /env
 /__pycache__
-sample.py
+.bashrc
 predict.py
 practice.ipynb

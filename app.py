@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
-from kiss import main
+from kiss.dataPrep import commodities, real_estate, securities, equities, crypto
 # from predict import pred
 
 def get_stock_data(ticker, start_date, end_date):
@@ -157,12 +157,13 @@ def main():
             st.write(ticker.cashflow)
             st.divider()
             
-            st.subheader("Stock Info")
-            st.write(ticker.info)
+            
+            st.subheader("Dataset stats")
+            st.write(tickerDf.describe())
             st.divider()
         
-            st.subheader("About Dataset")
-            st.write(tickerDf.describe())
+            st.subheader("Stock Info")
+            st.write(ticker.info)
 
 
 
@@ -309,8 +310,61 @@ def main():
     elif selected == "KISS":
         st.title("Keep It Simple Strategy")
         st.divider()
-        st.write(main.check())
+        st.write("""When it comes to investing, simplicity often leads to success. The KISS(Keep It Simple Strategy) principle 
+                 advocates for straightforward strategies that minimizes complexity and risk. Popular avenues for investment 
+                 include gold, a time-tested hedge against economic uncertainty; real eastate, offering long-term appreciation and rental income; 
+                 government bonds, known for stability and fixed returns; stocks via index funds like the Nifty50, providing diversified exposure 
+                 to top indian companies; and cryptocurrencies such as Bitcoin, offering potential high returns but with higher risk. 
+                 Diversifying across theses asset classes can help manage risk and optimize returns over the long term, aligning with 
+                 the KISS principle of simplicity in investing strategies.""")
+        st.divider()
         
+        periods = {"1 year": 1, "5 years": 5, "10 years":10}
+        options = [1,5,10]
+        period = st.selectbox("Select a period", options, placeholder="Select a period...")
+        st.divider()
+        
+        gold_data = commodities(period)
+        st.subheader("Commodity")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=gold_data.index, y=gold_data['Cumulative Returns'], name="Gold Returns", line=dict(color="yellow", width=3)))
+        fig.update_layout(title="Gold Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
+        st.plotly_chart(fig)
+        st.divider()
+
+        realEstate = real_estate(period)
+        st.subheader("Real Estate")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=realEstate.index, y=realEstate['Cumulative Returns'], name="Property Returns", line=dict(color="yellow", width=3)))
+        fig.update_layout(title="Residential Property Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
+        st.plotly_chart(fig)
+        st.divider()
+
+        securityBonds = securities(period)
+        st.subheader("Bond")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=securityBonds.index, y=securityBonds['Returns'], name="Bond Returns", line=dict(color="yellow", width=3)))
+        fig.update_layout(title="Government Bond Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
+        st.plotly_chart(fig)
+        st.divider()
+
+        indexETF = equities(period)
+        st.subheader("Index")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=indexETF.index, y=indexETF['Cumulative Returns'], name="Index Returns", line=dict(color="yellow", width=3)))
+        fig.update_layout(title="Nifty50 Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
+        st.plotly_chart(fig)
+        st.divider()
+
+        cryptoCurrency = crypto(period)
+        st.subheader("Crypto Currency")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=cryptoCurrency.index, y=cryptoCurrency['Cumulative Returns'], name="Crypto Returns", line=dict(color="yellow", width=3)))
+        fig.update_layout(title="Bitcoin Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
+        st.plotly_chart(fig)
+        st.divider()
+
+
 
 
 
