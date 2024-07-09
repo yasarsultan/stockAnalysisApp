@@ -1,11 +1,9 @@
 import requests 
 import os 
-# from dotenv import load_dotenv
 import pandas as pd 
 import yfinance as yf 
 from fredapi import Fred 
 
-# load_dotenv() # take environment variable from .env
 
 def load_gold():
     gold_data = yf.download('GOLDBEES.NS', period='10y')

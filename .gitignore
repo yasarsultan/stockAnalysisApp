@@ -1,5 +1,4 @@
 /env
 /__pycache__
 .bashrc
-predict.py
 practice.ipynb

@@ -1,25 +1,27 @@
 import streamlit as st
 import yfinance as yf
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
 from kiss.dataPrep import commodities, real_estate, securities, equities, crypto
-# from predict import pred
+from predict import getPrediction
+
 
 def get_stock_data(ticker, start_date, end_date):
     try:
         stock = yf.Ticker(ticker)
         
         data = stock.history(start=start_date, end=end_date)
-    
+        
     except Exception as e:
         stock, data = None
         print(f"An unexpected error occurred: {e}")
 
     finally:
+
         return stock, data
+    
     
 def get_moving_averages(data):
     data['MA50'] = data['Close'].rolling(window=50).mean()
@@ -71,6 +73,9 @@ def main():
             st.write("Please change start date to get appropriate results.")
         else:
             ticker, tickerDf = get_stock_data(tickerSymbol, startdate, enddate)
+            if ticker is None:
+                st.write("Please enter a valid ticker symbol.")
+                return
             st.divider()
 
             st.subheader("Stock Price")
@@ -166,8 +171,6 @@ def main():
             st.write(ticker.info)
 
 
-
-
     elif selected == "Compare":
         st.title("Comparision")
         st.divider()
@@ -183,6 +186,10 @@ def main():
                 st.write("Enter 1st stock")
                 ticker1 = st.text_input('Ticker Symbol', 'AAPL')
                 stock1, tickerDf1 = get_stock_data(ticker1, startdate, enddate)
+                if stock1 is None:
+                    st.write("Please enter a valid ticker symbol.")
+                    return
+                
                 st.subheader('Stock Price')
                 if tickerDf1['Close'].iloc[-1] > tickerDf1['Close'].iloc[0]:
                     linecolor = 'green'
@@ -230,6 +237,10 @@ def main():
                 st.write("Enter 2nd stock")
                 ticker2 = st.text_input('Ticker Symbol', 'GOOG')
                 stock2, tickerDf2 = get_stock_data(ticker2, startdate, enddate)
+                if stock is None:
+                    st.write("Please enter a valid ticker symbol.")
+                    return
+                
                 st.subheader("")
                 if tickerDf2['Close'].iloc[-1] > tickerDf2['Close'].iloc[0]:
                     linecolor = 'green'
@@ -294,17 +305,52 @@ def main():
         startdate = st.date_input('Start Date')
         enddate = st.date_input('End Date')
         stock, tickerDf = get_stock_data(tickerSymbol, startdate, enddate)
+        st.divider()
 
+        if stock is None:
+            st.write("Please enter a valid ticker symbol.")
+            return
+        
+        if abs((enddate - startdate).days) < 365 * 3:
+            st.write("Please select a period of at least 3 years to predict stock prices.")
+            return
+
+        st.subheader("Stock Price History")
         fig, ax = plt.subplots(figsize=(16, 6))
         ax.set_title('Price History')
         ax.plot(tickerDf['Close'])
         ax.set_xlabel('Date', fontsize=18)
         ax.set_ylabel('Price', fontsize=18)
         st.pyplot(fig)
+        st.divider()
 
-        st.write("")
-        st.subheader("Stock price prediction is only available on local machine...")
-        # pred(tickerDf)
+        # Get the prediction
+        valid, rmse = getPrediction(tickerDf)
+
+        st.subheader("Model Performance Metrics")
+        st.markdown(f'<h1 style="text-align:center;">RMSE: {rmse:.2f}</h1>', unsafe_allow_html=True)
+        st.divider()
+        
+        st.subheader("Predicted Stock Prices")
+        fig, ax = plt.subplots(figsize=(16, 6))
+        ax.set_title('Prices chart with predictions')
+        ax.set_xlabel('Date', fontsize=18)
+        ax.set_ylabel('Price', fontsize=18)
+        ax.plot(tickerDf['Close'], label='Training Values')
+        ax.plot(valid['Close'], label='Actual Values')
+        ax.plot(valid['Predictions'], label='Prediction Values')
+        ax.legend(loc='lower right')
+        st.pyplot(fig)
+        
+        fig, ax = plt.subplots(figsize=(16, 6))
+        ax.set_title('Predictions vs Actual Values')
+        ax.set_xlabel('Date', fontsize=18)
+        ax.set_ylabel('Price', fontsize=18)
+        ax.plot(valid['Close'], fontsize=18, label='Actual Values')
+        ax.plot(valid['Predictions'], fontsize=18, label='Prediction Values')
+        ax.legend(loc='lower right')
+        st.pyplot(fig)
+
 
 
     elif selected == "KISS":
@@ -363,8 +409,6 @@ def main():
         fig.update_layout(title="Bitcoin Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
         st.plotly_chart(fig)
         st.divider()
-
-
 
 
 
