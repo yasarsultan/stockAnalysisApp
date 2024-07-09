@@ -346,8 +346,8 @@ def main():
         ax.set_title('Predictions vs Actual Values')
         ax.set_xlabel('Date', fontsize=18)
         ax.set_ylabel('Price', fontsize=18)
-        ax.plot(valid['Close'], fontsize=18, label='Actual Values')
-        ax.plot(valid['Predictions'], fontsize=18, label='Prediction Values')
+        ax.plot(valid['Close'], label='Actual Values')
+        ax.plot(valid['Predictions'], label='Prediction Values')
         ax.legend(loc='lower right')
         st.pyplot(fig)
 
