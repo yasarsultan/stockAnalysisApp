@@ -237,7 +237,7 @@ def main():
                 st.write("Enter 2nd stock")
                 ticker2 = st.text_input('Ticker Symbol', 'GOOG')
                 stock2, tickerDf2 = get_stock_data(ticker2, startdate, enddate)
-                if stock is None:
+                if stock2 is None:
                     st.write("Please enter a valid ticker symbol.")
                     return
                 
@@ -373,7 +373,7 @@ def main():
         gold_data = commodities(period)
         st.subheader("Commodity")
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=gold_data.index, y=gold_data['Cumulative Returns'], name="Gold Returns", line=dict(color="yellow", width=3)))
+        fig.add_trace(go.Scatter(x=gold_data.index, y=gold_data['Cumulative Returns'], name="Gold Returns", line=dict(color="yellow", width=1)))
         fig.update_layout(title="Gold Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
         st.plotly_chart(fig)
         st.divider()
@@ -397,7 +397,7 @@ def main():
         indexETF = equities(period)
         st.subheader("Index")
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=indexETF.index, y=indexETF['Cumulative Returns'], name="Index Returns", line=dict(color="yellow", width=3)))
+        fig.add_trace(go.Scatter(x=indexETF.index, y=indexETF['Cumulative Returns'], name="Index Returns", line=dict(color="yellow", width=1)))
         fig.update_layout(title="Nifty50 Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
         st.plotly_chart(fig)
         st.divider()
@@ -405,7 +405,7 @@ def main():
         cryptoCurrency = crypto(period)
         st.subheader("Crypto Currency")
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=cryptoCurrency.index, y=cryptoCurrency['Cumulative Returns'], name="Crypto Returns", line=dict(color="yellow", width=3)))
+        fig.add_trace(go.Scatter(x=cryptoCurrency.index, y=cryptoCurrency['Cumulative Returns'], name="Crypto Returns", line=dict(color="yellow", width=1)))
         fig.update_layout(title="Bitcoin Returns", yaxis_title='Returns in (%)', xaxis_rangeslider_visible=True)
         st.plotly_chart(fig)
         st.divider()
