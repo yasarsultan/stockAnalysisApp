@@ -61,7 +61,7 @@ Whether you're a seasoned investor or just starting out, this app provides the t
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/stock-analysis-app.git
+git clone https://github.com/yasarsultan/stockAnalysisApp.git
 
 # Navigate to the project directory
 cd stock-analysis-app
