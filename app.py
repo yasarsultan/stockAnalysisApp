@@ -78,6 +78,9 @@ def main():
                 return
             st.divider()
 
+            if tickerDf.empty:
+                st.write("Unable to fetch data!")
+
             st.subheader("Stock Price")
             if tickerDf['Close'].iloc[-1] > tickerDf['Close'].iloc[0]:
                 linecolor = 'green'
@@ -189,6 +192,8 @@ def main():
                 if stock1 is None:
                     st.write("Please enter a valid ticker symbol.")
                     return
+                if tickerDf1.empty:
+                    st.write("Unable to fetch data!")
                 
                 st.subheader('Stock Price')
                 if tickerDf1['Close'].iloc[-1] > tickerDf1['Close'].iloc[0]:
@@ -242,6 +247,8 @@ def main():
                     return
                 
                 st.subheader("")
+                if tickerDf2.empty:
+                    st.write("Unable to fetch data!")
                 if tickerDf2['Close'].iloc[-1] > tickerDf2['Close'].iloc[0]:
                     linecolor = 'green'
                 else:
